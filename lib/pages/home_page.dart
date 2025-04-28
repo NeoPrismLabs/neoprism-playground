@@ -14,70 +14,105 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 1200),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
+          child: LayoutBuilder(builder: (context, constraints) {
+            // Use constraints to determine responsive behavior
+            final isSmallScreen = constraints.maxWidth < 600;
+            final isMediumScreen = constraints.maxWidth < 900;
+
+            return Padding(
+              padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeader(),
+                  _buildHeader(isSmallScreen),
+                  const SizedBox(height: 30),
+                  _buildNavigation(context, isMediumScreen),
+                  _buildIntroduction(isSmallScreen),
+                  const SizedBox(height: 30),
+                  _buildComponentGrid(context, isSmallScreen, isMediumScreen),
                   const SizedBox(height: 40),
-                  _buildNavigation(context),
-                  _buildIntroduction(),
-                  const SizedBox(height: 40),
-                  _buildComponentGrid(context),
-                  const SizedBox(height: 60),
-                  _buildFooter(context),
+                  _buildFooter(context, isSmallScreen),
                 ],
               ),
-            ),
-          ),
+            );
+          }),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  // Responsive header
+  Widget _buildHeader(bool isSmallScreen) {
     return Builder(builder: (context) {
       final theme = Theme.of(context);
 
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              NeoCard(
-                id: 'logo_card',
-                backgroundColor: AppColors.primary,
-                borderColor: AppColors.primaryDark,
-                borderWidth: 3,
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+          isSmallScreen
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.diamond_outlined, size: 28),
-                    SizedBox(width: 8),
+                    NeoCard(
+                      id: 'logo_card',
+                      backgroundColor: AppColors.primary,
+                      borderColor: AppColors.primaryDark,
+                      borderWidth: 3,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.diamond_outlined, size: 24),
+                          SizedBox(width: 8),
+                          Text(
+                            'NeoPrism',
+                            style: theme.textTheme.headlineMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 12),
                     Text(
-                      'NeoPrism',
-                      style: theme.textTheme.displaySmall,
+                      'Playground',
+                      style: theme.textTheme.displayMedium,
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    NeoCard(
+                      id: 'logo_card',
+                      backgroundColor: AppColors.primary,
+                      borderColor: AppColors.primaryDark,
+                      borderWidth: 3,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.diamond_outlined, size: 28),
+                          SizedBox(width: 8),
+                          Text(
+                            'NeoPrism',
+                            style: theme.textTheme.displaySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Text(
+                      'Playground',
+                      style: theme.textTheme.displayLarge,
                     ),
                   ],
                 ),
-              ),
-              SizedBox(width: 16),
-              Text(
-                'Playground',
-                style: theme.textTheme.displayLarge,
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
+          SizedBox(height: isSmallScreen ? 12 : 20),
           Text(
             'Interactive component showcase for the NeoPrism UI library',
             style: theme.textTheme.bodyLarge?.copyWith(
               color: AppColors.gray600,
-              fontSize: 20,
+              fontSize: isSmallScreen ? 16 : 20,
             ),
           ),
         ],
@@ -85,7 +120,8 @@ class HomePage extends StatelessWidget {
     });
   }
 
-  Widget _buildIntroduction() {
+  // Responsive introduction
+  Widget _buildIntroduction(bool isSmallScreen) {
     return Builder(builder: (context) {
       final theme = Theme.of(context);
 
@@ -99,7 +135,9 @@ class HomePage extends StatelessWidget {
           children: [
             Text(
               'What is this?',
-              style: theme.textTheme.displaySmall,
+              style: isSmallScreen
+                  ? theme.textTheme.headlineLarge
+                  : theme.textTheme.displaySmall,
             ),
             SizedBox(height: 16),
             Text(
@@ -113,7 +151,7 @@ class HomePage extends StatelessWidget {
               backgroundColor: Colors.white,
               borderColor: AppColors.gray400,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -125,19 +163,22 @@ class HomePage extends StatelessWidget {
                           'URL Pattern:',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: isSmallScreen ? 14 : 16,
                           ),
                         ),
                       ],
                     ),
                     SizedBox(height: 12),
-                    SelectableText(
-                      'http://playground.neoprismlabs.in/#/[component]?style=[style-variant]&theme=[light|dark]',
-                      style: TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 14,
-                        color: AppColors.gray800,
-                        background: Paint()..color = AppColors.gray100,
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SelectableText(
+                        'http://playground.neoprismlabs.in/#/[component]?style=[style-variant]&theme=[light|dark]',
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: isSmallScreen ? 12 : 14,
+                          color: AppColors.gray800,
+                          background: Paint()..color = AppColors.gray100,
+                        ),
                       ),
                     ),
                   ],
@@ -150,46 +191,71 @@ class HomePage extends StatelessWidget {
     });
   }
 
-  Widget _buildNavigation(BuildContext context) {
+  // Responsive navigation
+  Widget _buildNavigation(BuildContext context, bool isMediumScreen) {
     return Container(
       margin: EdgeInsets.only(bottom: 30),
       child: NeoCard(
         id: 'navigation_card',
         backgroundColor: AppColors.gray100,
         padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _navItem(context, 'Buttons', Icons.touch_app, 'button'),
-            _navItem(context, 'Alerts', Icons.announcement, 'alert'),
-            _navItem(context, 'Badges', Icons.local_offer, 'badge'),
-            _navItem(context, 'Inputs', Icons.input, 'input'),
-            _navItem(context, 'Checkboxes', Icons.check_box, 'checkbox'),
-            _navItem(context, 'Cards', Icons.credit_card, 'card'),
-            _navItem(context, 'Toggles', Icons.toggle_on, 'toggle'),
-            _navItem(
-                context, 'Dropdowns', Icons.arrow_drop_down_circle, 'dropdown'),
-            _navItem(context, 'Sliders', Icons.tune, 'slider'),
-          ],
-        ),
+        child: isMediumScreen
+            ? Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.spaceEvenly,
+                children: [
+                  _navItem(context, 'Buttons', Icons.touch_app, 'button'),
+                  _navItem(context, 'Alerts', Icons.announcement, 'alert'),
+                  _navItem(context, 'Badges', Icons.local_offer, 'badge'),
+                  _navItem(context, 'Inputs', Icons.input, 'input'),
+                  _navItem(context, 'Checkboxes', Icons.check_box, 'checkbox'),
+                  _navItem(context, 'Cards', Icons.credit_card, 'card'),
+                  _navItem(context, 'Toggles', Icons.toggle_on, 'toggle'),
+                  _navItem(context, 'Dropdowns', Icons.arrow_drop_down_circle,
+                      'dropdown'),
+                  _navItem(context, 'Sliders', Icons.tune, 'slider'),
+                ],
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _navItem(context, 'Buttons', Icons.touch_app, 'button'),
+                  _navItem(context, 'Alerts', Icons.announcement, 'alert'),
+                  _navItem(context, 'Badges', Icons.local_offer, 'badge'),
+                  _navItem(context, 'Inputs', Icons.input, 'input'),
+                  _navItem(context, 'Checkboxes', Icons.check_box, 'checkbox'),
+                  _navItem(context, 'Cards', Icons.credit_card, 'card'),
+                  _navItem(context, 'Toggles', Icons.toggle_on, 'toggle'),
+                  _navItem(context, 'Dropdowns', Icons.arrow_drop_down_circle,
+                      'dropdown'),
+                  _navItem(context, 'Sliders', Icons.tune, 'slider'),
+                ],
+              ),
       ),
     );
   }
 
+  // Navigation item
   Widget _navItem(
       BuildContext context, String label, IconData icon, String route) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: InkWell(
         borderRadius: BorderRadius.circular(8),
         onTap: () => context.go('/$route'),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 18, color: AppColors.gray800),
+              Icon(icon, size: 16, color: AppColors.gray800),
               SizedBox(width: 4),
-              Text(label, style: TextStyle(color: AppColors.gray800)),
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.gray800,
+                      fontWeight: FontWeight.w500)),
             ],
           ),
         ),
@@ -197,7 +263,9 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildComponentGrid(BuildContext context) {
+  // Responsive component grid
+  Widget _buildComponentGrid(
+      BuildContext context, bool isSmallScreen, bool isMediumScreen) {
     final theme = Theme.of(context);
 
     return Column(
@@ -205,13 +273,16 @@ class HomePage extends StatelessWidget {
       children: [
         Text(
           'Components',
-          style: theme.textTheme.displaySmall,
+          style: isSmallScreen
+              ? theme.textTheme.headlineLarge
+              : theme.textTheme.displaySmall,
         ),
         SizedBox(height: 24),
         Wrap(
-          spacing: 20,
-          runSpacing: 20,
+          spacing: isSmallScreen ? 10 : 20,
+          runSpacing: isSmallScreen ? 10 : 20,
           children: [
+            // Same component cards but with responsive width
             _buildComponentCard(
               context,
               'Buttons',
@@ -227,6 +298,8 @@ class HomePage extends StatelessWidget {
                 ComponentStyle('disabled', 'Disabled'),
               ],
               'button',
+              isSmallScreen,
+              isMediumScreen,
             ),
             _buildComponentCard(
               context,
@@ -241,6 +314,8 @@ class HomePage extends StatelessWidget {
                 ComponentStyle('longContent', 'Long Content'),
               ],
               'alert',
+              isSmallScreen,
+              isMediumScreen,
             ),
             _buildComponentCard(
               context,
@@ -255,6 +330,8 @@ class HomePage extends StatelessWidget {
                 ComponentStyle('custom', 'Custom'),
               ],
               'badge',
+              isSmallScreen,
+              isMediumScreen,
             ),
             _buildComponentCard(
               context,
@@ -271,6 +348,8 @@ class HomePage extends StatelessWidget {
                 ComponentStyle('prefix', 'With Prefix'),
               ],
               'input',
+              isSmallScreen,
+              isMediumScreen,
             ),
             _buildComponentCard(
               context,
@@ -287,6 +366,8 @@ class HomePage extends StatelessWidget {
                 ComponentStyle('standalone', 'Standalone'),
               ],
               'checkbox',
+              isSmallScreen,
+              isMediumScreen,
             ),
             _buildComponentCard(
               context,
@@ -300,6 +381,8 @@ class HomePage extends StatelessWidget {
                 ComponentStyle('media', 'Media'),
               ],
               'card',
+              isSmallScreen,
+              isMediumScreen,
             ),
             _buildComponentCard(
               context,
@@ -316,6 +399,8 @@ class HomePage extends StatelessWidget {
                 ComponentStyle('settings', 'Settings'),
               ],
               'toggle',
+              isSmallScreen,
+              isMediumScreen,
             ),
             _buildComponentCard(
               context,
@@ -329,6 +414,8 @@ class HomePage extends StatelessWidget {
                 ComponentStyle('disabled', 'Disabled'),
               ],
               'dropdown',
+              isSmallScreen,
+              isMediumScreen,
             ),
             _buildComponentCard(
               context,
@@ -342,6 +429,8 @@ class HomePage extends StatelessWidget {
                 ComponentStyle('disabled', 'Disabled'),
               ],
               'slider',
+              isSmallScreen,
+              isMediumScreen,
             ),
           ],
         ),
@@ -356,6 +445,8 @@ class HomePage extends StatelessWidget {
     Color color,
     List<ComponentStyle> styles,
     String componentRoute,
+    bool isSmallScreen,
+    bool isMediumScreen,
   ) {
     final theme = Theme.of(context);
 
@@ -369,24 +460,27 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(16.0),
+            width: double.infinity,
+            padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               border: Border(bottom: BorderSide(color: color, width: 2)),
             ),
             child: Row(
               children: [
-                Icon(icon, color: color, size: 28),
+                Icon(icon, color: color, size: isSmallScreen ? 24 : 28),
                 SizedBox(width: 12),
                 Text(
                   title,
-                  style: theme.textTheme.headlineLarge,
+                  style: isSmallScreen
+                      ? theme.textTheme.headlineMedium
+                      : theme.textTheme.headlineLarge,
                 ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -405,74 +499,138 @@ class HomePage extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                NeoButton.small(
-                  id: 'view_all_${componentRoute}_btn',
-                  label: 'View Default',
-                  backgroundColor: color,
-                  borderColor: Colors.black,
-                  textColor: AppColors.gray800,
-                  onPressed: () {
-                    context.go('/$componentRoute');
-                  },
-                ),
-                NeoButton.small(
-                  id: 'dark_${componentRoute}_btn',
-                  label: 'Dark Theme',
-                  backgroundColor: AppColors.gray800,
-                  textColor: Colors.white,
-                  onPressed: () {
-                    context.go('/$componentRoute?theme=dark');
-                  },
-                ),
-              ],
-            ),
+            padding: EdgeInsets.fromLTRB(16, 0, 16, isSmallScreen ? 12 : 16),
+            child: isSmallScreen
+                ? Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: NeoButton.small(
+                          id: 'view_all_${componentRoute}_btn',
+                          label: 'View Default',
+                          backgroundColor: color,
+                          borderColor: Colors.black,
+                          textColor: AppColors.gray800,
+                          onPressed: () {
+                            context.go('/$componentRoute');
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: NeoButton.small(
+                          id: 'dark_${componentRoute}_btn',
+                          label: 'Dark Theme',
+                          backgroundColor: AppColors.gray800,
+                          textColor: Colors.white,
+                          onPressed: () {
+                            context.go('/$componentRoute?theme=dark');
+                          },
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      NeoButton.small(
+                        id: 'view_all_${componentRoute}_btn',
+                        label: 'View Default',
+                        backgroundColor: color,
+                        borderColor: Colors.black,
+                        textColor: AppColors.gray800,
+                        onPressed: () {
+                          context.go('/$componentRoute');
+                        },
+                      ),
+                      NeoButton.small(
+                        id: 'dark_${componentRoute}_btn',
+                        label: 'Dark Theme',
+                        backgroundColor: AppColors.gray800,
+                        textColor: Colors.white,
+                        onPressed: () {
+                          context.go('/$componentRoute?theme=dark');
+                        },
+                      ),
+                    ],
+                  ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFooter(BuildContext context) {
+  // Responsive footer
+  Widget _buildFooter(BuildContext context, bool isSmallScreen) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Divider(thickness: 2),
         SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '© 2025 NeoPrismLabs UI Library',
-              style: TextStyle(
-                color: AppColors.gray600,
+        isSmallScreen
+            ? Column(
+                children: [
+                  Text(
+                    '© 2025 NeoPrismLabs UI Library',
+                    style: TextStyle(color: AppColors.gray600),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      NeoButton.small(
+                        id: 'github_btn',
+                        label: 'GitHub',
+                        backgroundColor: AppColors.gray200,
+                        textColor: AppColors.gray800,
+                        onPressed: () {
+                          _launchURL('https://github.com/NeoPrismLabs');
+                        },
+                      ),
+                      SizedBox(width: 10),
+                      NeoButton.small(
+                        id: 'docs_btn',
+                        label: 'Documentation',
+                        backgroundColor: AppColors.gray200,
+                        textColor: AppColors.gray800,
+                        onPressed: () {
+                          _launchURL('https://docs.neoprismlabs.in');
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '© 2025 NeoPrismLabs UI Library',
+                    style: TextStyle(color: AppColors.gray600),
+                  ),
+                  SizedBox(width: 20),
+                  NeoButton.small(
+                    id: 'github_btn',
+                    label: 'GitHub',
+                    backgroundColor: AppColors.gray200,
+                    textColor: AppColors.gray800,
+                    onPressed: () {
+                      _launchURL('https://github.com/NeoPrismLabs');
+                    },
+                  ),
+                  SizedBox(width: 10),
+                  NeoButton.small(
+                    id: 'docs_btn',
+                    label: 'Documentation',
+                    backgroundColor: AppColors.gray200,
+                    textColor: AppColors.gray800,
+                    onPressed: () {
+                      _launchURL('https://docs.neoprismlabs.in');
+                    },
+                  ),
+                ],
               ),
-            ),
-            SizedBox(width: 20),
-            NeoButton.small(
-              id: 'github_btn',
-              label: 'GitHub',
-              backgroundColor: AppColors.gray200,
-              textColor: AppColors.gray800,
-              onPressed: () {
-                _launchURL('https://github.com/NeoPrismLabs');
-              },
-            ),
-            SizedBox(width: 10),
-            NeoButton.small(
-              id: 'docs_btn',
-              label: 'Documentation',
-              backgroundColor: AppColors.gray200,
-              textColor: AppColors.gray800,
-              onPressed: () {
-                _launchURL('https://docs.neoprismlabs.in');
-              },
-            ),
-          ],
-        ),
         SizedBox(height: 20),
       ],
     );
